@@ -24,7 +24,7 @@ jobs:
         run: npm ci
       
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install firefox webkit --with-deps
         
       - name: Run Playwright tests
         run: npx playwright test
@@ -58,5 +58,5 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "⚠️ Nightly test run failed on ${{ github.repository }}"
           body: "The nightly test run has failed. Please check the GitHub Actions logs for more details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          to: albertscibor@gmail.com
           from: GitHub Actions
