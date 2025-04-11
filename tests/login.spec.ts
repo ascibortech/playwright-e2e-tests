@@ -4,34 +4,23 @@ test.describe('Login functionality', () => {
   // Increase the test timeout to accommodate potential network issues
   test.setTimeout(120000);
   
-  test('should show error message with invalid credentials', async ({ page, browserName }) => {
+  test('should show error message with invalid credentials', async ({ page }) => {
     // Given user navigates to the login page with retry mechanism
     let retryCount = 3;
     let success = false;
     
-    // Adjust settings for Chromium
-    if (browserName === 'chromium') {
-      // Use a more conservative approach for Chromium
-      await page.goto('https://4f.com.pl/customer/account/login', { 
-        waitUntil: 'commit', // Use the most basic load state
-        timeout: 30000 
-      });
-    } else {
-      // For other browsers, use the retry mechanism
-      while (retryCount > 0 && !success) {
-        try {
-          await page.goto('https://4f.com.pl/customer/account/login', { 
-            waitUntil: 'domcontentloaded',
-            timeout: 60000 
-          });
-          success = true;
-        } catch (error) {
-          console.log(`Navigation attempt failed. Retries left: ${retryCount-1}`);
-          retryCount--;
-          if (retryCount === 0) throw error;
-          // Use a safer timeout approach
-          await new Promise(resolve => setTimeout(resolve, 5000));
-        }
+    while (retryCount > 0 && !success) {
+      try {
+        await page.goto('https://4f.com.pl/customer/account/login', { 
+          waitUntil: 'domcontentloaded',
+          timeout: 60000 
+        });
+        success = true;
+      } catch (error) {
+        console.log(`Navigation attempt failed. Retries left: ${retryCount-1}`);
+        retryCount--;
+        if (retryCount === 0) throw error;
+        await new Promise(resolve => setTimeout(resolve, 5000));
       }
     }
     
@@ -61,6 +50,6 @@ test.describe('Login functionality', () => {
     await expect(errorMessage).toHaveText(new RegExp('Podany e-mail lub hasło są niepoprawne|Konto zostało czasowo zablokowane z powodu wielokrotnego nieprawidłowego logowania'));
     
     // And a screenshot is taken for verification
-    await page.screenshot({ path: `test-results/login-error-${browserName}.png` });
+    await page.screenshot({ path: `test-results/login-error.png` });
   });
 });
