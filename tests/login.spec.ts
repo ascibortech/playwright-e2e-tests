@@ -5,23 +5,15 @@ test.describe('Login functionality', () => {
   test.setTimeout(process.env.CI ? 180000 : 120000);
   
   test('should show error message with invalid credentials', async ({ page }) => {
-    // Given user navigates to the login page with retry mechanism
-    let retryCount = 3;
-    let success = false;
-    
-    while (retryCount > 0 && !success) {
-      try {
-        await page.goto('https://4f.com.pl/customer/account/login', { 
-          waitUntil: 'domcontentloaded',
-          timeout: 60000 
-        });
-        success = true;
-      } catch (error) {
-        console.log(`Navigation attempt failed. Retries left: ${retryCount-1}`);
-        retryCount--;
-        if (retryCount === 0) throw error;
-        await new Promise(resolve => setTimeout(resolve, 5000));
-      }
+    // Given user navigates to the login page
+    try {
+      await page.goto('https://4f.com.pl/customer/account/login', { 
+        waitUntil: 'domcontentloaded',
+        timeout: 60000 
+      });
+    } catch (error) {
+      console.log('Navigation failed after retries:', error);
+      throw error;
     }
     
     // And cookie dialog is handled
