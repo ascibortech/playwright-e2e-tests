@@ -58,5 +58,5 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "⚠️ Nightly test run failed on ${{ github.repository }}"
           body: "The nightly test run has failed. Please check the GitHub Actions logs for more details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          to: albertscibor@gmail.com
           from: GitHub Actions
