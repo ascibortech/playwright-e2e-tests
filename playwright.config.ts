@@ -25,6 +25,10 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    headless: true,
+    viewport: { width: 1280, height: 720 },
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
+    javaScriptEnabled: true,
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 
@@ -32,19 +36,12 @@ export default defineConfig({
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
     launchOptions: {
-      args: ['--disable-http2'],
-      headless: false
+      args: ['--disable-http2', '--disable-blink-features=AutomationControlled'],
     },
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
   },
 
   /* Configure projects for major browsers */
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
