@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Login functionality', () => {
-  // Increase the test timeout to accommodate potential network issues
-  test.setTimeout(120000);
+  // Increase the test timeout significantly for CI environments
+  test.setTimeout(process.env.CI ? 180000 : 120000);
   
   test('should show error message with invalid credentials', async ({ page }) => {
     // Given user navigates to the login page with retry mechanism

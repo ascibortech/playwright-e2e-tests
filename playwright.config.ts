@@ -35,21 +35,26 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
-    launchOptions: {
-      args: ['--disable-http2', '--disable-blink-features=AutomationControlled'],
-    },
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          args: ['--disable-blink-features=AutomationControlled'],
+        },
+      },
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { 
+        ...devices['Desktop Safari'],
+        // WebKit doesn't support the --disable-http2 flag
+      },
     },
 
     /* Test against mobile viewports. */
