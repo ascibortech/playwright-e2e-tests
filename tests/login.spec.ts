@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { faker } from '@faker-js/faker';
 
 test.describe('Login functionality', () => {
   // Increase the test timeout significantly for CI environments
   test.setTimeout(process.env.CI ? 180000 : 120000);
   
-  test('should show error message with invalid credentials', async ({ page }) => {
+  test('Given user with invalid credentials, when they attempt to login, then error message is displayed', async ({ page }) => {
     // Given user navigates to the login page
     try {
       await page.goto('https://4f.com.pl/customer/account/login', { 
@@ -27,8 +28,9 @@ test.describe('Login functionality', () => {
       console.log('Cookie dialog not found or could not be interacted with');
     }
     
-    // When user enters invalid credentials
-    await page.locator('input[name="email"]').fill('testtesttestttest@niepodam.pl');
+    // When user enters invalid credentials with random email
+    const randomEmail = faker.internet.email();
+    await page.locator('input[name="email"]').fill(randomEmail);
     await page.locator('input[name="password"]').fill('21e12e12e12e12');
     
     // And clicks the login button
@@ -38,10 +40,11 @@ test.describe('Login functionality', () => {
     const errorMessage = page.locator('.errorMessage-errorMessage-4tj');
     await expect(errorMessage).toBeVisible({ timeout: 15000 });
     
-    // And the error message should contain expected text
-    await expect(errorMessage).toHaveText(new RegExp('Podany e-mail lub hasło są niepoprawne|Konto zostało czasowo zablokowane z powodu wielokrotnego nieprawidłowego logowania'));
+    // And the error message should specifically indicate incorrect credentials
+    await expect(errorMessage).toHaveText('Podany e-mail lub hasło są niepoprawne');
     
     // And a screenshot is taken for verification
-    await page.screenshot({ path: `test-results/login-error.png` });
+    const safeEmail = randomEmail.replace(/[@.]/g, '_');
+    await page.screenshot({ path: `test-results/login-error-${safeEmail}.png` });
   });
 });
