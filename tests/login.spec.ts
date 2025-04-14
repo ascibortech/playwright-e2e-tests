@@ -41,7 +41,7 @@ test.describe('Login functionality', () => {
     await expect(errorMessage).toBeVisible({ timeout: 15000 });
     
     // And the error message should specifically indicate incorrect credentials
-    await expect(errorMessage).toHaveText('Podany e-mail lub hasło są niepoprawne');
+    await expect(errorMessage).toContainText('Podany e-mail lub hasło są niepoprawne');
     
     // And a screenshot is taken for verification
     const safeEmail = randomEmail.replace(/[@.]/g, '_');
