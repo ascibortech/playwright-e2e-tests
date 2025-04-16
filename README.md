@@ -9,6 +9,7 @@ This repository contains end-to-end tests for an e-commerce application using Pl
 - **Pattern**: Page Object Model (POM)
 - **Code Quality**: ESLint, SonarQube
 - **CI/CD**: GitHub Actions
+- **AI Assistance**: [Claude 3.7 Sonnet](https://www.anthropic.com/claude) - Advanced LLM for coding used to develop and optimize tests
 
 ## Project Structure
 
@@ -70,11 +71,11 @@ USER_PASSWORD=your-test-password
 ### Running All Tests
 
 ```bash
-# Run all tests in chromium browser
+# Run all tests in firefox browser
 npm test
 
 # Or run with specific browser
-npx playwright test --project=chromium
+npx playwright test --project=firefox
 ```
 
 ### Running Specific Tests
@@ -134,22 +135,32 @@ SonarQube analyzes the codebase for:
 
 Configuration is in `sonar-project.properties` file. The SonarQube dashboard provides detailed reports on each scan.
 
+### GitHub Copilot Code Review
+
+GitHub Copilot is configured to automatically review pull requests to the main branch:
+
+- Identifies potential bugs and security issues
+- Suggests code quality improvements
+- Provides feedback on test coverage
+- Helps maintain consistent coding patterns across the codebase
+
+This automated AI-powered review complements human reviews and other static analysis tools.
+
 ## Test Coverage
 
 ### Login Functionality
-- User login with valid credentials
-- Login attempts with invalid credentials
-- Account lockout after multiple failed attempts
-- User logout
+- **Given** user with invalid credentials, **when** they attempt to login, **then** error message is displayed
+- **Given** user repeatedly using same invalid credentials, **when** login attempts exceed limit (20), **then** account should be temporarily locked
+- **Given** user with valid credentials, **when** they login, **then** they should be redirected to account page
+- **Given** user is logged in, **when** using direct selector logout sequence, **then** logout confirmation should be displayed
 
 ### Shopping Cart Functionality
-- Adding products to cart
-- Verifying cart counts and totals
-- Mini cart interactions
+- **Given** user views a product, **when** adding to cart, **then** item should appear on mini cart and count should increase
+- **Given** user adds products to cart, **then** cart total should be updated correctly
 
 ### Session Management
-- Cookie consent handling
-- Authentication state persistence
+- **Given** user visits the site, **when** cookie consent appears, **then** it can be automatically handled
+- **Given** authenticated user has active session, **when** revisiting the site, **then** authentication state is preserved
 
 ## Contributing
 
