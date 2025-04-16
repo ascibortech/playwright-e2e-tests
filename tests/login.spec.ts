@@ -1,50 +1,145 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/cookieFixtures';
 import { faker } from '@faker-js/faker';
+import { LoginPage } from '../pages/LoginPage';
+import { AccountPage } from '../pages/AccountPage';
+
+// Get credentials from environment variables or use placeholder values for CI error messages
+const USER_EMAIL = process.env.USER_EMAIL || 'missing-email-env-variable';
+const USER_PASSWORD = process.env.USER_PASSWORD || 'missing-password-env-variable';
 
 test.describe('Login functionality', () => {
-  // Increase the test timeout significantly for CI environments
   test.setTimeout(process.env.CI ? 180000 : 120000);
   
-  test('Given user with invalid credentials, when they attempt to login, then error message is displayed', async ({ page }) => {
-    // Given user navigates to the login page
-    try {
-      await page.goto('https://4f.com.pl/customer/account/login', { 
-        waitUntil: 'domcontentloaded',
-        timeout: 60000 
-      });
-    } catch (error) {
-      console.log('Navigation failed after retries:', error);
-      throw error;
-    }
+  // Skip tests that require valid credentials if they're not available
+  const skipCredentialTests = !process.env.USER_EMAIL || !process.env.USER_PASSWORD;
+  
+  test('Given user with invalid credentials, when they attempt to login, then error message is displayed', async ({ cookiesAccepted: page }) => {
+    //Given
+    const loginPage = new LoginPage(page);
+    await loginPage.navigateToLoginPage();
     
-    // And cookie dialog is handled
-    try {
-      await page.waitForSelector('#CybotCookiebotDialog[style*="display: flex"]', { timeout: 10000 });
-      const cookieAccept = page.locator('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll');
-      if (await cookieAccept.isVisible({ timeout: 5000 }))
-        await cookieAccept.click();
-    } catch {
-      // Silently handle any errors with cookie dialog
-      console.log('Cookie dialog not found or could not be interacted with');
-    }
-    
-    // When user enters invalid credentials with random email
+    //When
     const randomEmail = faker.internet.email();
-    await page.locator('input[name="email"]').fill(randomEmail);
-    await page.locator('input[name="password"]').fill('21e12e12e12e12');
+    await loginPage.fillLoginForm(randomEmail, '21e12e12e12e12');
     
-    // And clicks the login button
-    await page.locator('button[type="submit"]:has-text("Zaloguj")').click();
+    //And
+    await loginPage.submitLoginForm();
     
-    // Then an error message should be displayed
-    const errorMessage = page.locator('.errorMessage-errorMessage-4tj');
-    await expect(errorMessage).toBeVisible({ timeout: 15000 });
+    //Then
+    await loginPage.expectFailedLogin('Podany e-mail lub hasło są niepoprawne');
     
-    // And the error message should specifically indicate incorrect credentials
-    await expect(errorMessage).toContainText('Podany e-mail lub hasło są niepoprawne');
-    
-    // And a screenshot is taken for verification
+    //And
     const safeEmail = randomEmail.replace(/[@.]/g, '_');
-    await page.screenshot({ path: `test-results/login-error-${safeEmail}.png` });
+    await loginPage.takeScreenshot(`login-error-${safeEmail}`);
+  });
+
+  test('Given user repeatedly using same invalid credentials, when login attempts exceed limit (20), then account should be temporarily locked', async ({ cookiesAccepted: page }) => {
+    //Given
+    const loginPage = new LoginPage(page);
+    const sameEmail = faker.internet.email();
+    const samePassword = 'incorrect-password123';
+    
+    //When
+    const maxAttempts = 20;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`Attempt ${attempt} of ${maxAttempts}`);
+      
+      //And
+      await loginPage.navigateToLoginPage();
+      
+      //And
+      await loginPage.fillLoginForm(sameEmail, samePassword);
+      
+      //And
+      await loginPage.submitLoginForm();
+      
+      //And
+      try {
+        await loginPage.hasErrorMessage();
+      } catch (error) {
+        console.log(`Error waiting for error message on attempt ${attempt}:`, error);
+      }
+    }
+    
+    //Then
+    await loginPage.expectFailedLogin('Konto zostało czasowo zablokowane z powodu wielokrotnego nieprawidłowego logowania');
+    
+    //And
+    const messageText = await loginPage.getErrorMessage();
+    console.log('Final error message:', messageText);
+    
+    //And
+    await loginPage.takeScreenshot('login-account-lockout');
+  });
+
+  test('Given user with valid credentials, when they login, then they should be redirected to account page', async ({ cookiesAccepted: page }) => {
+    test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');
+    
+    //Given
+    const loginPage = new LoginPage(page);
+    await loginPage.navigateToLoginPage();
+    
+    //When
+    await loginPage.login(USER_EMAIL, USER_PASSWORD);
+    
+    //Then
+    await loginPage.expectSuccessfulLogin();
+    
+    //And
+    await loginPage.takeScreenshot('login-successful');
+  });
+
+  // test('Given user is logged in, when they click logout, then they should be logged out', async ({ cookiesAccepted: page }) => {
+  //   test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');
+    
+  //   //Given
+  //   const loginPage = new LoginPage(page);
+  //   const accountPage = new AccountPage(page);
+    
+  //   //And
+  //   await loginPage.login(USER_EMAIL, USER_PASSWORD);
+    
+  //   //And
+  //   await accountPage.navigateToAccountPage();
+    
+  //   //When
+  //   await accountPage.logout();
+    
+  //   //Then
+  //   // Verify we're redirected to the homepage after logout
+  //   await page.waitForURL('https://4f.com.pl/', { timeout: 15000 });
+    
+  //   //And
+  //   // Take a screenshot after logging out
+  //   await loginPage.takeScreenshot('logout-successful');
+    
+  //   //And
+  //   // Verify that the account chip shows the login state (rather than user info)
+  //   const accountChip = page.locator('.accountChip-buttonDescription-CfD');
+  //   await expect(accountChip).toHaveText('Profil');
+  // });
+  
+  test('Given user is logged in, when using direct selector logout sequence, then logout confirmation should be displayed', async ({ cookiesAccepted: page }) => {
+    test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');
+    
+    //Given
+    const loginPage = new LoginPage(page);
+    const accountPage = new AccountPage(page);
+    
+    //And
+    await loginPage.login(USER_EMAIL, USER_PASSWORD);
+    
+    //When
+    await accountPage.openAccountMenu();
+    
+    //And
+    await accountPage.clickLogout();
+    
+    //Then
+    await accountPage.verifyLogoutConfirmation();
+    
+    //And
+    await accountPage.takeAccountScreenshot('logout-direct-selectors');
   });
 });

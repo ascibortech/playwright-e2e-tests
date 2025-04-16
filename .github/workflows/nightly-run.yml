@@ -27,10 +27,72 @@ jobs:
         run: npx playwright install firefox webkit --with-deps
         
       - name: Run Playwright tests
-        run: npx playwright test
+        id: run_tests
+        run: |
+          npx playwright test --reporter=list,json
+          echo "::set-output name=test_status::$?"
+        continue-on-error: true
         env:
           USER_EMAIL: ${{ secrets.USER_EMAIL }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+      
+      - name: Generate test summary
+        if: always()
+        id: test_summary
+        run: |
+          if [ -f playwright-report/results.json ]; then
+            echo "Generating test summary from JSON report..."
+            SUMMARY=$(node -e '
+              const report = require("./playwright-report/results.json");
+              const failed = report.suites.flatMap(suite => 
+                suite.specs.filter(spec => spec.ok === false)
+                  .map(spec => {
+                    const testFile = suite.file.split("/").pop();
+                    return `❌ ${spec.title} (${testFile})`;
+                  })
+              );
+              
+              const passed = report.suites.flatMap(suite => 
+                suite.specs.filter(spec => spec.ok === true)
+                  .map(spec => {
+                    const testFile = suite.file.split("/").pop();
+                    return `✅ ${spec.title} (${testFile})`;
+                  })
+              );
+              
+              const skipped = report.suites.flatMap(suite => 
+                suite.specs.filter(spec => spec.tests.some(t => t.status === "skipped"))
+                  .map(spec => {
+                    const testFile = suite.file.split("/").pop();
+                    return `⏭️ ${spec.title} (${testFile})`;
+                  })
+              );
+              
+              const summary = [
+                `Total: ${passed.length + failed.length + skipped.length} tests`,
+                `Passed: ${passed.length}`,
+                `Failed: ${failed.length}`,
+                `Skipped: ${skipped.length}`,
+                "",
+                "Failed Tests:",
+                ...failed,
+                "",
+                "Passed Tests:",
+                ...passed,
+                "",
+                "Skipped Tests:",
+                ...skipped
+              ].join("\n");
+              
+              console.log(summary);
+            ')
+            echo 'TEST_SUMMARY<<EOF' >> $GITHUB_ENV
+            echo "$SUMMARY" >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+          else
+            echo "No test results found!"
+            echo 'TEST_SUMMARY=No test result data available.' >> $GITHUB_ENV
+          fi
           
       - name: Upload test results
         if: always()
@@ -57,6 +119,13 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "⚠️ Nightly test run failed on ${{ github.repository }}"
-          body: "The nightly test run has failed. Please check the GitHub Actions logs for more details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body: |
+            The nightly test run has failed.
+            
+            Test Summary:
+            ${{ env.TEST_SUMMARY }}
+            
+            For more details, check the GitHub Actions logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           to: albertscibor@gmail.com
           from: GitHub Actions

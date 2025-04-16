@@ -21,7 +21,6 @@
     "@cucumber/cucumber": "^11.2.0",
     "@cucumber/pretty-formatter": "^1.0.1",
     "cucumber-html-reporter": "^7.2.0",
-    "dotenv": "^16.4.7",
     "playwright": "^1.51.1"
   },
   "devDependencies": {
@@ -30,7 +29,9 @@
     "@types/node": "^22.14.0",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
+    "dotenv": "^16.5.0",
     "eslint": "^9.24.0",
+    "eslint-plugin-playwright": "^2.2.0",
     "globals": "^16.0.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.1"
