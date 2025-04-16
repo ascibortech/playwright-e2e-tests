@@ -91,36 +91,6 @@ test.describe('Login functionality', () => {
     await loginPage.takeScreenshot('login-successful');
   });
 
-  // test('Given user is logged in, when they click logout, then they should be logged out', async ({ cookiesAccepted: page }) => {
-  //   test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');
-    
-  //   //Given
-  //   const loginPage = new LoginPage(page);
-  //   const accountPage = new AccountPage(page);
-    
-  //   //And
-  //   await loginPage.login(USER_EMAIL, USER_PASSWORD);
-    
-  //   //And
-  //   await accountPage.navigateToAccountPage();
-    
-  //   //When
-  //   await accountPage.logout();
-    
-  //   //Then
-  //   // Verify we're redirected to the homepage after logout
-  //   await page.waitForURL('https://4f.com.pl/', { timeout: 15000 });
-    
-  //   //And
-  //   // Take a screenshot after logging out
-  //   await loginPage.takeScreenshot('logout-successful');
-    
-  //   //And
-  //   // Verify that the account chip shows the login state (rather than user info)
-  //   const accountChip = page.locator('.accountChip-buttonDescription-CfD');
-  //   await expect(accountChip).toHaveText('Profil');
-  // });
-  
   test('Given user is logged in, when using direct selector logout sequence, then logout confirmation should be displayed', async ({ cookiesAccepted: page }) => {
     /* eslint-disable-next-line playwright/no-skipped-test */
     test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');

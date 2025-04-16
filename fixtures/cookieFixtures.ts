@@ -1,5 +1,4 @@
-import { test as base, expect } from '@playwright/test';
-import { Page } from '@playwright/test';
+import { test as base, expect, Page } from '@playwright/test';
 
 // Define our fixture types
 type CookieFixtures = {
