@@ -171,4 +171,5 @@ Thumbs.db
 /playwright-report/
 /blob-report/
 /playwright/.cache/
->>>>>>> origin/main
+
+local.env
