@@ -21,7 +21,7 @@ test.describe('Shopping cart functionality', () => {
     try {
       await page.closePopups();
       initialCartCount = await productPage.getCartIconCount();
-    } catch (error) {
+    } catch {
       // Assuming 0 if count can't be retrieved
     }
     
@@ -39,7 +39,6 @@ test.describe('Shopping cart functionality', () => {
     
     //And
     await expect(productPage.getCartIconCounterLocator()).toBeVisible();
-    const currentCartCount = await productPage.getCartIconCount();
     await productPage.verifyCartIconCountIncreased(initialCartCount);
     
     //And

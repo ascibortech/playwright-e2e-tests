@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/cookieFixtures';
+import { test } from '../fixtures/cookieFixtures';
 import { faker } from '@faker-js/faker';
 import { LoginPage } from '../pages/LoginPage';
 import { AccountPage } from '../pages/AccountPage';
@@ -74,6 +74,7 @@ test.describe('Login functionality', () => {
   });
 
   test('Given user with valid credentials, when they login, then they should be redirected to account page', async ({ cookiesAccepted: page }) => {
+    /* eslint-disable-next-line playwright/no-skipped-test */
     test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');
     
     //Given
@@ -121,6 +122,7 @@ test.describe('Login functionality', () => {
   // });
   
   test('Given user is logged in, when using direct selector logout sequence, then logout confirmation should be displayed', async ({ cookiesAccepted: page }) => {
+    /* eslint-disable-next-line playwright/no-skipped-test */
     test.skip(skipCredentialTests, 'Test skipped because USER_EMAIL or USER_PASSWORD environment variables are not set');
     
     //Given

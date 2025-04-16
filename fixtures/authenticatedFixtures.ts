@@ -6,14 +6,14 @@ const USER_EMAIL = process.env.USER_EMAIL || 'missing-email-env-variable';
 const USER_PASSWORD = process.env.USER_PASSWORD || 'missing-password-env-variable';
 
 // Storage state for authenticated session (worker-scoped)
-let authStorageState: any | undefined;
+let authStorageState: Record<string, unknown> | undefined;
 
 // Check if credentials are available
 const hasCredentials = !!process.env.USER_EMAIL && !!process.env.USER_PASSWORD;
 
 // Define our fixture types
 type AuthFixtures = {
-  loggedInState: any;
+  loggedInState: Record<string, unknown>;
   loggedInPage: Page;
 };
 

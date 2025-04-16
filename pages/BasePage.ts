@@ -101,7 +101,7 @@ export class BasePage {
       await this.cartIconCounter.waitFor({ state: 'visible', timeout: 3000 });
       const countText = await this.cartIconCounter.textContent();
       return countText ? parseInt(countText.trim(), 10) : 0;
-    } catch (error) {
+    } catch {
       await this.miniCartButton.waitFor({ state: 'visible', timeout: 3000 });
       const buttonText = await this.miniCartButton.textContent();
       
@@ -143,7 +143,7 @@ export class BasePage {
     
     try {
       await this.miniCartProductList.waitFor({ state: 'visible', timeout: 5000 });
-    } catch (error) {
+    } catch {
       await this.page.waitForSelector('.minicart-items-wrapper, .miniCart-body-Aqj', { state: 'visible', timeout: 5000 })
         .catch(() => {});
     }

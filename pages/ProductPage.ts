@@ -64,7 +64,7 @@ export class ProductPage extends BasePage {
           return;
         }
       }
-    } catch (error) {
+    } catch {
       // Continue if error occurs
     }
   }
