@@ -1,3 +1,16 @@
+name: Email Sending Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  email-test:
+    name: Email Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
       - name: Debug secrets (do not log actual values)
         run: |
           echo "MAIL_SERVER is set: ${{ secrets.MAIL_SERVER != '' }}"
@@ -10,7 +23,7 @@
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
-          secure: true # set explicitly if using port 465 (SSL)
+          secure: true
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "✅ GitHub Actions Email Test"
