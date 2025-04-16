@@ -70,14 +70,14 @@ export class AccountPage extends BasePage {
    * Assert that the user is on the account page
    */
   async expectToBeOnAccountPage(): Promise<void> {
-    await expect(this.page).toHaveURL(/.*\/customer\/account.*/);
+    await expect(this.page).toHaveURL(/^https?:\/\/[^\/]+\/customer\/account(\/)?$/);
   }
 
   /**
    * Assert that the user is on the orders page
    */
   async expectToBeOnOrdersPage(): Promise<void> {
-    await expect(this.page).toHaveURL(/.*\/customer\/account\/orders.*/);
+    await expect(this.page).toHaveURL(/^https?:\/\/[^\/]+\/customer\/account\/orders(\/)?$/);
   }
 
   /**
