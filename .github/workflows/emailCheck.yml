@@ -1,0 +1,60 @@
+name: Email Notification Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Debug environment
+        run: |
+          echo "Running on: $(uname -a)"
+          echo "GitHub context: ${{ github.repository }} / ${{ github.workflow }}"
+      
+      - name: Debug secrets
+        run: |
+          echo "MAIL_SERVER is set: ${{ secrets.MAIL_SERVER != '' }}"
+          echo "MAIL_PORT is set: ${{ secrets.MAIL_PORT != '' }}"
+          echo "MAIL_USERNAME is set: ${{ secrets.MAIL_USERNAME != '' }}"
+          echo "MAIL_PASSWORD is set: ${{ secrets.MAIL_PASSWORD != '' }}"
+      
+      - name: Test network connectivity
+        run: |
+          if [ ! -z "${{ secrets.MAIL_SERVER }}" ]; then
+            nc -zv ${{ secrets.MAIL_SERVER }} ${{ secrets.MAIL_PORT }} || echo "Connection failed"
+          else
+            echo "Mail server not configured"
+          fi
+      
+      - name: Send Test Email
+        id: send-email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "GitHub Actions Email Test"
+          body: |
+            This is a test email sent by GitHub Actions.
+            
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            
+            Check the logs for details.
+          to: ${{ secrets.MAIL_USERNAME }}
+          from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
+      
+      - name: Report email status
+        if: always()
+        run: |
+          if [ "${{ steps.send-email.outcome }}" == "success" ]; then
+            echo "Email was sent successfully!"
+          else
+            echo "Email sending failed. Check the logs for details."
+          fi
