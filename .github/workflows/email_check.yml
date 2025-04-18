@@ -1,40 +1,71 @@
-name: Email Sending Test
+name: Email Notification Test
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allow manual triggering
+  # Uncomment below if you want to run on push to main branch
+  # push:
+  #   branches: [ main ]
 
 jobs:
-  email-test:
-    name: Email Test
+  send-email:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Checkout code
         uses: actions/checkout@v3
-
+      
+      - name: Debug environment
+        run: |
+          echo "Running on: $(uname -a)"
+          echo "GitHub context: ${{ github.repository }} / ${{ github.workflow }} / ${{ github.run_id }}"
+      
       - name: Debug secrets (do not log actual values)
         run: |
           echo "MAIL_SERVER is set: ${{ secrets.MAIL_SERVER != '' }}"
           echo "MAIL_PORT is set: ${{ secrets.MAIL_PORT != '' }}"
           echo "MAIL_USERNAME is set: ${{ secrets.MAIL_USERNAME != '' }}"
           echo "MAIL_PASSWORD is set: ${{ secrets.MAIL_PASSWORD != '' }}"
-
+      
+      - name: Test network connectivity
+        run: |
+          # Test connection to mail server without exposing credentials
+          echo "Testing network connectivity to mail server..."
+          if [ ! -z "${{ secrets.MAIL_SERVER }}" ]; then
+            nc -zv ${{ secrets.MAIL_SERVER }} ${{ secrets.MAIL_PORT }} || echo "Connection failed"
+          else
+            echo "Mail server not configured"
+          fi
+      
       - name: Send Test Email
+        id: send-email
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
-          secure: true
+          secure: true # set explicitly if using port 465 (SSL)
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "✅ GitHub Actions Email Test"
           body: |
             This is a test email sent by GitHub Actions.
-
+            
             Repository: ${{ github.repository }}
             Workflow: ${{ github.workflow }}
             Run ID: ${{ github.run_id }}
-
-            Check the logs here:
-            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Check the logs here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           to: ${{ secrets.MAIL_USERNAME }}
           from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
+      
+      - name: Report email status
+        if: always()
+        run: |
+          if [ "${{ steps.send-email.outcome }}" == "success" ]; then
+            echo "Email was sent successfully!"
+          else
+            echo "Email sending failed. Check the logs above for details."
+            echo "Common issues:"
+            echo "1. Incorrect mail server credentials"
+            echo "2. Mail server rejecting connections (firewall/security settings)"
+            echo "3. Authentication method not supported"
+            echo "4. Rate limiting on the mail server"
+          fi
